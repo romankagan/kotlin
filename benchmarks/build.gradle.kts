@@ -92,16 +92,14 @@ benchmark {
     }
 }
 
-tasks.named("classes") {
-    doLast {
-        tasks.named("mainBenchmarkJar", Zip::class.java) {
-            isZip64 = true
-            archiveName = "benchmarks.jar"
-        }
-        listOf("mainBenchmark", "mainFirBenchmark", "mainNiBenchmark").forEach {
-            tasks.named(it, JavaExec::class.java) {
-                systemProperty("idea.home.path", intellijRootDir().canonicalPath)
-            }
+afterEvaluate {
+    tasks.named("mainBenchmarkJar", Zip::class.java) {
+        isZip64 = true
+        archiveFileName.set("benchmarks.jar")
+    }
+    for (execTask in listOf("mainBenchmark", "mainFirBenchmark", "mainNiBenchmark")) {
+        tasks.named(execTask, JavaExec::class.java) {
+            systemProperty("idea.home.path", intellijRootDir().canonicalPath)
         }
     }
 }
