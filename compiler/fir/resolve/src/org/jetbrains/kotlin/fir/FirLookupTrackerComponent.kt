@@ -48,7 +48,11 @@ abstract class FirLookupTrackerComponent : FirSessionComponent {
             if (type is ConeKotlinErrorType) return // TODO: investigate whether some cases should be recorded, e.g. unresolved
             type.classId?.let {
                 if (!it.isLocal) {
-                    recordLookup(it.shortClassName, source, fileSource, it.packageFqName.asString())
+                    if (it.shortClassName.asString() != "Companion") {
+                        recordLookup(it.shortClassName, source, fileSource, it.packageFqName.asString())
+                    } else {
+                        recordLookup(it.outerClassId!!.shortClassName, source, fileSource, it.outerClassId!!.packageFqName.asString())
+                    }
                 }
             }
             type.typeArguments.forEach {
