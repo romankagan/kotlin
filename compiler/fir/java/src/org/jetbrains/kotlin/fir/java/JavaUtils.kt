@@ -726,7 +726,7 @@ private fun FirConstExpression<*>.setProperType(session: FirSession): FirConstEx
         type = kind.expectedConeType(session)
     }
     replaceTypeRef(typeRef)
-    session.firLookupTracker?.recordLookup(typeRef, source, null)
+    session.firLookupTracker?.recordTypeResolve(typeRef, source, null)
     return this
 }
 

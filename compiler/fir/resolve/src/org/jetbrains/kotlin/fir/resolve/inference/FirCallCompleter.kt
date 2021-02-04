@@ -65,7 +65,7 @@ class FirCallCompleter(
         if (call is FirExpression) {
             val resolvedTypeRef = typeRef.resolvedTypeFromPrototype(initialType)
             call.resultType = resolvedTypeRef
-            session.firLookupTracker?.recordLookup(resolvedTypeRef, call.source, null)
+            session.firLookupTracker?.recordTypeResolve(resolvedTypeRef, call.source, null)
         }
 
         if (expectedTypeRef is FirResolvedTypeRef) {
@@ -214,13 +214,13 @@ class FirCallCompleter(
             lambdaArgument.valueParameters.forEachIndexed { index, parameter ->
                 val newReturnTypeRef = parameter.returnTypeRef.resolvedTypeFromPrototype(parameters[index].approximateLambdaInputType())
                 parameter.replaceReturnTypeRef(newReturnTypeRef)
-                session.firLookupTracker?.recordLookup(newReturnTypeRef, parameter.source, null)
+                session.firLookupTracker?.recordTypeResolve(newReturnTypeRef, parameter.source, null)
             }
 
             lambdaArgument.replaceValueParameters(lambdaArgument.valueParameters + listOfNotNull(itParam))
             lambdaArgument.replaceReturnTypeRef(
                 expectedReturnTypeRef?.also {
-                    session.firLookupTracker?.recordLookup(it, lambdaArgument.source, null)
+                    session.firLookupTracker?.recordTypeResolve(it, lambdaArgument.source, null)
                 } ?: components.noExpectedType
             )
 

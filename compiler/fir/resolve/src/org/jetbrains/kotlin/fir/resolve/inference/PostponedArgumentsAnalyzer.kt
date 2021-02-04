@@ -96,7 +96,7 @@ class PostponedArgumentsAnalyzer(
             if (resultingCandidate != null) {
                 val resolvedTypeRef = buildResolvedTypeRef { type = resultingCandidate.resultingTypeForCallableReference!! }
                 replaceTypeRef(resolvedTypeRef)
-                resolutionContext.session.firLookupTracker?.recordLookup(resolvedTypeRef, source, null)
+                resolutionContext.session.firLookupTracker?.recordTypeResolve(resolvedTypeRef, source, null)
             }
         }
     }

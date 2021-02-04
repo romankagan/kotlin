@@ -41,14 +41,23 @@ abstract class FirLookupTrackerComponent : FirSessionComponent {
         }
     }
 
-    fun recordLookup(typeRef: FirResolvedTypeRef, source: FirSourceElement?, fileSource: FirSourceElement?) {
+    fun recordTypeResolve(typeRef: FirResolvedTypeRef, source: FirSourceElement?, fileSource: FirSourceElement?) {
         if (source == null && fileSource == null) return // TODO: investigate all cases
-        if (typeRef.type is ConeKotlinErrorType) return // TODO: investigate whether some cases should be recorded, e.g. unresolved
-        typeRef.type.classId?.let {
-            if (!it.isLocal) {
-                recordLookup(it.shortClassName, source, fileSource, it.packageFqName.asString())
+
+        fun recordIfValid(type: ConeKotlinType) {
+            if (type is ConeKotlinErrorType) return // TODO: investigate whether some cases should be recorded, e.g. unresolved
+            type.classId?.let {
+                if (!it.isLocal) {
+                    recordLookup(it.shortClassName, source, fileSource, it.packageFqName.asString())
+                }
+            }
+            type.typeArguments.forEach {
+                if (it is ConeKotlinType) recordIfValid(it)
+                else recordIfValid(type.type)
             }
         }
+
+        recordIfValid(typeRef.type)
     }
 
     fun recordLookup(symbol: FirBasedSymbol<*>, source: FirSourceElement?, fileSource: FirSourceElement?, scopes: Array<String>) {
