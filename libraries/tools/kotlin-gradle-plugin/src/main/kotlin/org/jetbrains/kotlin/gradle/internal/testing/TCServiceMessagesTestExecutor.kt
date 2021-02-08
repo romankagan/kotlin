@@ -44,8 +44,6 @@ class TCServiceMessagesTestExecutor(
 
     override fun execute(spec: TCServiceMessagesTestExecutionSpec, testResultProcessor: TestResultProcessor) {
         spec.wrapExecute {
-            val rootOperation = buildOperationExecutor.currentOperation.parentId!!
-
             val client = spec.createClient(testResultProcessor, log)
 
             try {
@@ -67,7 +65,7 @@ class TCServiceMessagesTestExecutor(
                 execHandle = exec.build()
 
                 lateinit var result: ExecResult
-                client.root(rootOperation) {
+                client.root {
                     execHandle.start()
                     result = execHandle.waitForFinish()
                 }

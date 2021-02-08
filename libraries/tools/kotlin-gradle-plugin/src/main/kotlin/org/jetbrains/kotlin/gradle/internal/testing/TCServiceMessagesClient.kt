@@ -36,14 +36,11 @@ internal open class TCServiceMessagesClient(
     val settings: TCServiceMessagesClientSettings,
     val log: Logger
 ) : ServiceMessageParserCallback {
-    lateinit var rootOperationId: OperationIdentifier
     var afterMessage = false
 
-    inline fun root(operation: OperationIdentifier, actions: () -> Unit) {
-        rootOperationId = operation
-
+    inline fun root(actions: () -> Unit) {
         val tsStart = System.currentTimeMillis()
-        val root = RootNode(operation)
+        val root = RootNode()
         open(tsStart, root)
         actions()
         ensureNodesClosed(root)
@@ -388,9 +385,8 @@ internal open class TCServiceMessagesClient(
         abstract fun requireReportingNode(): TestDescriptorInternal
     }
 
-    inner class RootNode(val ownerBuildOperationId: OperationIdentifier) : GroupNode(null, settings.rootNodeName) {
+    inner class RootNode() : GroupNode(null, settings.rootNodeName) {
         override val descriptor: TestDescriptorInternal = object : DefaultTestSuiteDescriptor(settings.rootNodeName, localId) {
-            override fun getOwnerBuildOperationId(): Any? = this@RootNode.ownerBuildOperationId
             override fun getParent(): TestDescriptorInternal? = null
             override fun toString(): String = name
         }
@@ -438,7 +434,6 @@ internal open class TCServiceMessagesClient(
             descriptor = object : DefaultTestSuiteDescriptor(id, fullName) {
                 override fun getDisplayName(): String = fullNameWithoutRoot
                 override fun getClassName(): String? = fullNameWithoutRoot
-                override fun getOwnerBuildOperationId(): Any? = rootOperationId
                 override fun getParent(): TestDescriptorInternal = reportingParent.descriptor
                 override fun toString(): String = displayName
             }
@@ -482,7 +477,6 @@ internal open class TCServiceMessagesClient(
 
         override val descriptor: TestDescriptorInternal =
             object : DefaultTestDescriptor(id, className, methodName, classDisplayName, displayName) {
-                override fun getOwnerBuildOperationId(): Any? = rootOperationId
                 override fun getParent(): TestDescriptorInternal = parentDescriptor
             }
 

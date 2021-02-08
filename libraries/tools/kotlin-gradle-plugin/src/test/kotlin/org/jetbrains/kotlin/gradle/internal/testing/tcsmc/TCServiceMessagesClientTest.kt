@@ -21,7 +21,7 @@ open class TCServiceMessagesClientTest {
         val results = RecordingTestResultProcessor()
         val client = createClient(results)
 
-        client.root(OperationIdentifier(1)) {
+        client.root {
             client.produceServiceMessage()
         }
 
