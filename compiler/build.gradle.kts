@@ -103,8 +103,9 @@ projectTest(parallel = true) {
 
     workingDir = rootDir
     systemProperty("kotlin.test.script.classpath", testSourceSet.output.classesDirs.joinToString(File.pathSeparator))
+    val antLauncher = antLauncherJar.asPath
     doFirst {
-        systemProperty("kotlin.ant.classpath", antLauncherJar.asPath)
+        systemProperty("kotlin.ant.classpath", antLauncher)
         systemProperty("kotlin.ant.launcher.class", "org.apache.tools.ant.Main")
     }
 }
