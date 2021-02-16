@@ -23,7 +23,8 @@ data class BuildLogFinder(
     private val isGradleEnabled: Boolean = false,
     private val isJsEnabled: Boolean = false,
     private val isScopeExpansionEnabled: Boolean = false,
-    private val isKlibEnabled: Boolean = false
+    private val isKlibEnabled: Boolean = false,
+    private val isFirEnabled: Boolean = false
 ) {
     companion object {
         private const val JS_LOG = "js-build.log"
@@ -32,6 +33,7 @@ data class BuildLogFinder(
         private const val GRADLE_LOG = "gradle-build.log"
         private const val DATA_CONTAINER_LOG = "data-container-version-build.log"
         const val JS_JPS_LOG = "js-jps-build.log"
+        private const val FIR_LOG = "fir-build.log"
         private const val SIMPLE_LOG = "build.log"
 
         fun isJpsLogFile(file: File): Boolean =
@@ -48,6 +50,7 @@ data class BuildLogFinder(
             isGradleEnabled && GRADLE_LOG in files -> GRADLE_LOG
             isJsEnabled && JS_JPS_LOG in files -> JS_JPS_LOG
             isDataContainerBuildLogEnabled && DATA_CONTAINER_LOG in files -> DATA_CONTAINER_LOG
+            isFirEnabled && FIR_LOG in files -> FIR_LOG
             SIMPLE_LOG in files -> SIMPLE_LOG
             else -> null
         }
