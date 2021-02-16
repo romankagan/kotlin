@@ -106,15 +106,13 @@ projectTest(parallel = false) {
     workingDir = rootDir
     useAndroidSdk()
 
-    doFirst {
-        val mainResourceDirPath = File(project.buildDir, "resources/main").absolutePath
-        sourceSets["test"].runtimeClasspath = sourceSets["test"].runtimeClasspath.filter { file ->
-            if (!file.absolutePath.contains(mainResourceDirPath)) {
-                true
-            } else {
-                println("Remove `${file.path}` from the test runtime classpath")
-                false
-            }
+    val mainResourceDirPath = File(project.buildDir, "resources/main").absolutePath
+    sourceSets["test"].runtimeClasspath = sourceSets["test"].runtimeClasspath.filter { file ->
+        if (!file.absolutePath.contains(mainResourceDirPath)) {
+            true
+        } else {
+            println("Remove `${file.path}` from the test runtime classpath")
+            false
         }
     }
 }
