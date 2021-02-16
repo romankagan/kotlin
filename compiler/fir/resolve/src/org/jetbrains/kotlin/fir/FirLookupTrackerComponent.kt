@@ -57,7 +57,6 @@ abstract class FirLookupTrackerComponent : FirSessionComponent {
             }
             type.typeArguments.forEach {
                 if (it is ConeKotlinType) recordIfValid(it)
-                else recordIfValid(type.type)
             }
         }
 
