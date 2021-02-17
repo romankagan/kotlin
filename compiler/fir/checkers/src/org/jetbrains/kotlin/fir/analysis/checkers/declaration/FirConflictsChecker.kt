@@ -13,7 +13,11 @@ import org.jetbrains.kotlin.fir.analysis.diagnostics.FirErrors
 import org.jetbrains.kotlin.fir.analysis.diagnostics.reportOn
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.firLookupTracker
+import org.jetbrains.kotlin.fir.scopes.PACKAGE_MEMBER
+import org.jetbrains.kotlin.fir.scopes.impl.FirPackageMemberScope
 import org.jetbrains.kotlin.fir.symbols.AbstractFirBasedSymbol
+import org.jetbrains.kotlin.name.Name
+import java.util.LinkedHashSet
 
 object FirConflictsChecker : FirBasicDeclarationChecker() {
     override fun check(declaration: FirDeclaration, context: CheckerContext, reporter: DiagnosticReporter) {
@@ -34,13 +38,13 @@ object FirConflictsChecker : FirBasicDeclarationChecker() {
         }
     }
 
-    private fun Map<String, List<FirDeclaration>>.forEachNonSingle(action: (FirDeclaration, Collection<AbstractFirBasedSymbol<*>>) -> Unit) {
+    private fun Map<String, LinkedHashSet<*>>.forEachNonSingle(action: (FirDeclaration, Collection<AbstractFirBasedSymbol<*>>) -> Unit) {
         for (value in values) {
             if (value.size > 1) {
                 val symbols = value.mapNotNull { (it as? FirSymbolOwner<*>)?.symbol }
 
                 value.forEach {
-                    action(it, symbols)
+                    action(it as FirDeclaration, symbols)
                 }
             }
         }
@@ -48,18 +52,44 @@ object FirConflictsChecker : FirBasicDeclarationChecker() {
 
     private fun checkFile(file: FirFile, inspector: FirDeclarationInspector, context: CheckerContext) {
         val lookupTracker = context.session.firLookupTracker
+
+        val packageMemberScope: FirPackageMemberScope = context.sessionHolder.scopeSession.getOrBuild(file.packageFqName, PACKAGE_MEMBER) {
+            FirPackageMemberScope(file.packageFqName, context.sessionHolder.session)
+        }
         for (topLevelDeclaration in file.declarations) {
-            inspector.collect(topLevelDeclaration)
-            if (lookupTracker != null) {
-                when (topLevelDeclaration) {
-                    is FirSimpleFunction -> topLevelDeclaration.name
-                    is FirVariable<*> -> topLevelDeclaration.name
-                    is FirRegularClass -> topLevelDeclaration.name
-                    is FirTypeAlias -> topLevelDeclaration.name
-                    else -> null
-                }?.let {
-                    lookupTracker.recordLookup(it, topLevelDeclaration.source, file.source, file.packageFqName.asString())
+            var declarationName: Name? = null
+            when (topLevelDeclaration) {
+                is FirSimpleFunction -> {
+                    declarationName = topLevelDeclaration.name
+                    packageMemberScope.processFunctionsByName(declarationName) {
+                        inspector.collect(it.fir)
+                    }
                 }
+                is FirVariable<*> -> {
+                    declarationName = topLevelDeclaration.name
+                    packageMemberScope.processPropertiesByName(declarationName) {
+                        inspector.collect(it.fir)
+                    }
+                }
+                is FirRegularClass -> {
+                    declarationName = topLevelDeclaration.name
+                    packageMemberScope.processClassifiersByNameWithSubstitution(declarationName) { symbol, _ ->
+                        (symbol.fir as? FirDeclaration)?.let {
+                            inspector.collect(it)
+                        }
+                    }
+                }
+                is FirTypeAlias -> {
+                    declarationName = topLevelDeclaration.name
+                    packageMemberScope.processClassifiersByNameWithSubstitution(declarationName) { symbol, _ ->
+                        (symbol.fir as? FirDeclaration)?.let {
+                            inspector.collect(it)
+                        }
+                    }
+                }
+            }
+            if (lookupTracker != null && declarationName != null) {
+                lookupTracker.recordLookup(declarationName, topLevelDeclaration.source, file.source, file.packageFqName.asString())
             }
         }
     }

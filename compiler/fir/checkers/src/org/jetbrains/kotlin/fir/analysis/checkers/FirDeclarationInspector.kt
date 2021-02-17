@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.fir.symbols.CallableId
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.Name
+import java.util.LinkedHashSet
 
 /**
  * Provides representations for FirElement's.
@@ -208,8 +209,8 @@ private fun FirDeclaration.isCollectable() = when (this) {
 class FirDeclarationInspector(
     private val presenter: FirDeclarationPresenter = FirDefaultDeclarationPresenter()
 ) {
-    val otherDeclarations = mutableMapOf<String, MutableList<FirDeclaration>>()
-    val functionDeclarations = mutableMapOf<String, MutableList<FirSimpleFunction>>()
+    val otherDeclarations = mutableMapOf<String, LinkedHashSet<FirDeclaration>>()
+    val functionDeclarations = mutableMapOf<String, LinkedHashSet<FirSimpleFunction>>()
 
     fun collect(declaration: FirDeclaration) {
         if (!declaration.isCollectable()) {
@@ -230,7 +231,7 @@ class FirDeclarationInspector(
         var value = otherDeclarations[key]
 
         if (value == null) {
-            value = mutableListOf()
+            value = LinkedHashSet()
             otherDeclarations[key] = value
         }
 
@@ -242,7 +243,7 @@ class FirDeclarationInspector(
         var value = functionDeclarations[key]
 
         if (value == null) {
-            value = mutableListOf()
+            value = LinkedHashSet()
             functionDeclarations[key] = value
         }
 
