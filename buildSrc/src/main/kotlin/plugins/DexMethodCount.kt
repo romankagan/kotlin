@@ -97,21 +97,28 @@ open class DexMethodCount : DefaultTask() {
 }
 
 open class DexMethodCountStats : DefaultTask() {
-
     @Internal
+    @Transient
     lateinit var from: TaskProvider<DexMethodCount>
 
     @get:InputFile
-    internal val inputFile
-        get() = from.get().detailOutputFile
+    internal val inputFile by lazy {
+        from.get().detailOutputFile
+    }
+
+    private val artifactOrArchiveName by lazy {
+        from.get().artifactOrArchiveName
+    }
+
+    private val ownPackages by lazy {
+        from.get().ownPackages
+    }
 
     @TaskAction
     private fun printStats() {
-        val artifactOrArchiveName = from.get().artifactOrArchiveName
         inputFile.reader().useLines { lines ->
             fun String.getStatValue() = substringBefore("\t").trim()
 
-            val ownPackages = from.get().ownPackages
             val statsLineCount = if (ownPackages == null) 1 else 3
             val stats = lines.take(statsLineCount).map { it.getStatValue() }.toList()
 
