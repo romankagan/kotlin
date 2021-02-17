@@ -9,15 +9,12 @@ import org.jetbrains.kotlin.fir.declarations.FirCallableDeclaration
 import org.jetbrains.kotlin.fir.diagnostics.ConeDiagnostic
 import org.jetbrains.kotlin.fir.render
 import org.jetbrains.kotlin.fir.resolve.calls.Candidate
-import org.jetbrains.kotlin.fir.resolve.calls.ResolutionDiagnostic
 import org.jetbrains.kotlin.fir.symbols.AbstractFirBasedSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirCallableSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.resolve.calls.inference.model.ConstraintSystemError
 import org.jetbrains.kotlin.resolve.calls.tower.CandidateApplicability
 
 class ConeUnresolvedReferenceError(val name: Name? = null) : ConeDiagnostic() {
@@ -26,6 +23,10 @@ class ConeUnresolvedReferenceError(val name: Name? = null) : ConeDiagnostic() {
 
 class ConeUnresolvedSymbolError(val classId: ClassId) : ConeDiagnostic() {
     override val reason: String get() = "Symbol not found for $classId"
+}
+
+class ConeUnresolvedQualifierError(val qualifier: String) : ConeDiagnostic() {
+    override val reason: String get() = "Symbol not found for ${qualifier}"
 }
 
 class ConeUnresolvedNameError(val name: Name) : ConeDiagnostic() {

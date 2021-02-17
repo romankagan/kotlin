@@ -29,7 +29,6 @@ enum class DiagnosticKind {
     SuperNotAllowed,
     NoTypeForTypeParameter,
     UnknownCallableKind,
-    SymbolNotFound,
     IllegalProjectionUsage,
     MissingStdlibClass,
     Other
