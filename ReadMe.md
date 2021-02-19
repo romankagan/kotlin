@@ -172,5 +172,4 @@ includeBuild('/path/to/kotlin') {
 Kotlin is distributed under the terms of the Apache License (Version 2.0). See [license folder](license/README.md) for details.
 
 # Contributing
-
 Please be sure to review Kotlin's [contributing guidelines](docs/contributing.md) to learn how to help the project.
